@@ -1,62 +1,59 @@
 # FinAlly — AI Trading Workstation
 
-A visually stunning AI-powered trading workstation that streams live market data, simulates portfolio trading, and integrates an LLM chat assistant that can analyze positions and execute trades via natural language.
+FinAlly (Finance Ally) is a simulated trading workstation with live streaming prices, a virtual $10,000 portfolio, and an LLM chat assistant that can analyze positions and execute trades on your behalf.
 
-Built entirely by coding agents as a capstone project for an agentic AI coding course.
+> **Status:** the market data component (price simulator) is complete. The API, database, LLM integration, and frontend are still to be built. See `planning/PLAN.md` for the full specification.
 
 ## Features
 
-- **Live price streaming** via SSE with green/red flash animations
-- **Simulated portfolio** — $10k virtual cash, market orders, instant fills
-- **Portfolio visualizations** — heatmap (treemap), P&L chart, positions table
-- **AI chat assistant** — analyzes holdings, suggests and auto-executes trades
-- **Watchlist management** — track tickers manually or via AI
-- **Dark terminal aesthetic** — Bloomberg-inspired, data-dense layout
+- Live-updating watchlist (10 default tickers) with price flashes and sparklines
+- Market-order trading, no fees, instant fills
+- Portfolio heatmap, P&L chart, and positions table
+- AI chat assistant that can trade and manage the watchlist via natural language
+- Dark, terminal-style UI
 
 ## Architecture
 
-Single Docker container serving everything on port 8000:
+Single Docker container on port 8000:
 
-- **Frontend**: Next.js (static export) with TypeScript and Tailwind CSS
-- **Backend**: FastAPI (Python/uv) with SSE streaming
-- **Database**: SQLite with lazy initialization
-- **AI**: LiteLLM → OpenRouter (Cerebras inference) with structured outputs
-- **Market data**: Built-in GBM simulator (default) or Massive API (optional)
+- **Frontend:** Next.js (TypeScript), static export served by FastAPI
+- **Backend:** FastAPI (Python, managed with `uv`)
+- **Database:** SQLite at `db/finally.db`, volume-mounted
+- **Streaming:** Server-Sent Events at `/api/stream/prices`
+- **Market data:** built-in GBM simulator
+- **LLM:** LiteLLM → OpenRouter (Cerebras inference)
 
-## Quick Start
+## Getting Started
+
+Create a `.env` in the project root:
 
 ```bash
-# Clone and configure
-cp .env.example .env
-# Add your OPENROUTER_API_KEY to .env
+OPENROUTER_API_KEY=your-openrouter-api-key-here
+LLM_MOCK=false   # set to "true" for deterministic mock LLM responses
+```
 
-# Run with Docker
+Once the app is built, run it with Docker:
+
+```bash
 docker build -t finally .
 docker run -v finally-data:/app/db -p 8000:8000 --env-file .env finally
-
-# Open http://localhost:8000
 ```
 
-## Environment Variables
+Then open http://localhost:8000. Start/stop scripts will live in `scripts/`.
 
-| Variable | Required | Description |
-|---|---|---|
-| `OPENROUTER_API_KEY` | Yes | OpenRouter API key for AI chat |
-| `MASSIVE_API_KEY` | No | Massive (Polygon.io) key for real market data; omit to use simulator |
-| `LLM_MOCK` | No | Set `true` for deterministic mock LLM responses (testing) |
-
-## Project Structure
+## Project Layout
 
 ```
-finally/
-├── frontend/    # Next.js static export
-├── backend/     # FastAPI uv project
-├── planning/    # Project documentation and agent contracts
-├── test/        # Playwright E2E tests
-├── db/          # SQLite volume mount (runtime)
-└── scripts/     # Start/stop helpers
+frontend/   Next.js app
+backend/    FastAPI uv project (market data, API, DB, LLM)
+planning/   Specification and agent reference docs (PLAN.md, API.md)
+scripts/    Docker start/stop scripts
+test/       Playwright E2E tests
+db/         Runtime SQLite volume mount
 ```
 
-## License
+## Documentation
 
-See [LICENSE](LICENSE).
+- `planning/PLAN.md` — project specification
+- `planning/API.md` — REST and SSE API contract
+- `planning/MARKET_DATA_SUMMARY.md` — market data component summary
