@@ -1,0 +1,18 @@
+# Optional convenience wrapper around the single-container app.
+# Usage: docker compose up --build      (then open http://localhost:8000)
+services:
+  finally:
+    build: .
+    image: finally
+    container_name: finally
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false   # app starts without it; chat then returns a friendly error
+    volumes:
+      - finally-data:/app/db
+    restart: unless-stopped
+
+volumes:
+  finally-data:

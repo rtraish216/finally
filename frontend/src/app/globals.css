@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0d1117;
+  --color-panel: #121821;
+  --color-raised: #182130;
+  --color-line: #232d3b;
+  --color-ink: #d8dee9;
+  --color-dim: #8592a6;
+  --color-faint: #56637a;
+  --color-up: #2fbf71;
+  --color-down: #ef5350;
+  --color-accent: #ecad0a;
+  --color-primary: #209dd7;
+  --color-submit: #753991;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numbers line up in columns and don't jitter as digits change. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Price flash: the class snaps the background on instantly (transition: none),
+   removing it lets the 500ms transition fade the colour away. */
+.price-cell {
+  transition: background-color 500ms ease-out, color 500ms ease-out;
+}
+.price-cell.flash-up {
+  background-color: rgba(47, 191, 113, 0.35);
+  transition: none;
+}
+.price-cell.flash-down {
+  background-color: rgba(239, 83, 80, 0.35);
+  transition: none;
+}
+
+/* Connection dot pulses only while reconnecting. */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.dot-reconnecting {
+  animation: pulse-dot 1s ease-in-out infinite;
+}
+
+/* Thin, dark scrollbars to match the terminal look. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2b3648 transparent;
+}
+
+:focus-visible {
+  outline: 1px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .price-cell { transition: none; }
+  .dot-reconnecting { animation: none; }
+}

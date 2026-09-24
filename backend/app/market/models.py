@@ -14,6 +14,11 @@ class PriceUpdate:
     price: float
     previous_price: float
     timestamp: float = field(default_factory=time.time)  # Unix seconds
+    session_start_price: float | None = None  # First price seen since app start; None -> price
+
+    def __post_init__(self) -> None:
+        if self.session_start_price is None:
+            object.__setattr__(self, "session_start_price", self.price)
 
     @property
     def change(self) -> float:
@@ -42,6 +47,7 @@ class PriceUpdate:
             "ticker": self.ticker,
             "price": self.price,
             "previous_price": self.previous_price,
+            "session_start_price": self.session_start_price,
             "timestamp": self.timestamp,
             "change": self.change,
             "change_percent": self.change_percent,

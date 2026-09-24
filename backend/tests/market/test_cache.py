@@ -101,3 +101,18 @@ class TestPriceCache:
         cache = PriceCache()
         update = cache.update("AAPL", 190.12345)
         assert update.price == 190.12
+
+
+class TestSessionStartPrice:
+    def test_session_start_is_first_price_and_sticks(self):
+        cache = PriceCache()
+        cache.update("AAPL", 190.00)
+        update = cache.update("AAPL", 195.00)
+        assert update.session_start_price == 190.00
+        assert update.to_dict()["session_start_price"] == 190.00
+
+    def test_remove_resets_session_start(self):
+        cache = PriceCache()
+        cache.update("AAPL", 190.00)
+        cache.remove("AAPL")
+        assert cache.update("AAPL", 200.00).session_start_price == 200.00

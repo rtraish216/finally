@@ -2,7 +2,7 @@
 
 FinAlly (Finance Ally) is a simulated trading workstation with live streaming prices, a virtual $10,000 portfolio, and an LLM chat assistant that can analyze positions and execute trades on your behalf.
 
-> **Status:** the market data component (price simulator) is complete. The API, database, LLM integration, and frontend are still to be built. See `planning/PLAN.md` for the full specification.
+> **Status:** all v1 components are built: market data simulator, SQLite database, FastAPI backend, LLM chat integration, Next.js frontend, Docker packaging and Playwright E2E tests. See `planning/PLAN.md` for the full specification.
 
 ## Features
 
@@ -25,21 +25,44 @@ Single Docker container on port 8000:
 
 ## Getting Started
 
-Create a `.env` in the project root:
+Prerequisite: Docker (Desktop or Engine).
 
-```bash
-OPENROUTER_API_KEY=your-openrouter-api-key-here
-LLM_MOCK=false   # set to "true" for deterministic mock LLM responses
-```
+1. Create a `.env` in the project root (optional; without it the app runs but AI chat is unavailable):
 
-Once the app is built, run it with Docker:
+   ```bash
+   cp .env.example .env   # then set OPENROUTER_API_KEY
+   ```
+
+   - `OPENROUTER_API_KEY` — OpenRouter key for the chat assistant
+   - `LLM_MOCK=true` — deterministic mock LLM responses (no key needed)
+
+2. Start the app:
+
+   ```bash
+   scripts/start_mac.sh            # macOS/Linux; add --build to force a rebuild, --open to open the browser
+   .\scripts\start_windows.ps1     # Windows PowerShell; -Build / -Open
+   ```
+
+3. Open http://localhost:8000.
+
+Stop it with `scripts/stop_mac.sh` (or `stop_windows.ps1`). The container is removed but the `finally-data` Docker volume, which holds the SQLite database, is kept. To reset all data: `docker volume rm finally-data`.
+
+Without the scripts:
 
 ```bash
 docker build -t finally .
-docker run -v finally-data:/app/db -p 8000:8000 --env-file .env finally
+docker run -d --name finally -v finally-data:/app/db -p 8000:8000 --env-file .env finally
+# or: docker compose up --build
 ```
 
-Then open http://localhost:8000. Start/stop scripts will live in `scripts/`.
+### End-to-end tests
+
+```bash
+docker compose -f test/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from playwright
+docker compose -f test/docker-compose.test.yml down -v
+```
+
+Runs the app with `LLM_MOCK=true` and a fresh database, plus a Playwright container.
 
 ## Project Layout
 

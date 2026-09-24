@@ -17,6 +17,7 @@ class PriceCache:
 
     def __init__(self) -> None:
         self._prices: dict[str, PriceUpdate] = {}
+        self._session_start: dict[str, float] = {}  # First price per ticker since app start
         self._lock = Lock()
         self._version: int = 0  # Monotonically increasing; bumped on every update
 
@@ -30,12 +31,15 @@ class PriceCache:
             ts = timestamp or time.time()
             prev = self._prices.get(ticker)
             previous_price = prev.price if prev else price
+            rounded = round(price, 2)
+            session_start = self._session_start.setdefault(ticker, rounded)
 
             update = PriceUpdate(
                 ticker=ticker,
-                price=round(price, 2),
+                price=rounded,
                 previous_price=round(previous_price, 2),
                 timestamp=ts,
+                session_start_price=session_start,
             )
             self._prices[ticker] = update
             self._version += 1
@@ -60,6 +64,7 @@ class PriceCache:
         """Remove a ticker from the cache (e.g., when removed from watchlist)."""
         with self._lock:
             self._prices.pop(ticker, None)
+            self._session_start.pop(ticker, None)
 
     @property
     def version(self) -> int:
